@@ -19,7 +19,7 @@ module Chat {
         // This appends the chat item and escapes it
         // TODO: make a smarter process for escaping chat so we can embed some html
         var newChatItem = $('<div/>').addClass('chatItem');
-        if (iconClass) newChatItem.append($('<div/>').addClass('iconClass'));
+        if (iconClass) newChatItem.append($('<div/>').addClass(iconClass));
         newChatItem.append(chatBody);
         newChatItem.appendTo($chatText);
         var msgs = $('.chatItem');
@@ -98,6 +98,8 @@ module Chat {
                     SetTextEntryMode(0);
                     $chatInput.blur();
                 }
+            } else {
+                $chatInput.blur();
             }
         }
     }
@@ -144,6 +146,7 @@ module Chat {
         var processed = $.terminal.parseCommand(input);
         var to;
         var body;
+        var name;
         switch (processed.name) {
             case '/join':
                 if (processed.args.length < 1) return false;
@@ -168,6 +171,23 @@ module Chat {
                 to = processed.args[0];
                 body = EverythingAfterArg(input, processed, 0);
                 cu.SendChat(XmppMessageType.CHAT, to, body);
+                return true;
+            case '/openui':
+                if (processed.args.length < 1) return false;
+                name = processed.args[0];
+                if (name.indexOf('.ui') === -1) {
+                    name = name + '.ui';
+                }
+                cuAPI.OpenUI(name);
+                return true;
+            case '/closeui':
+                if (processed.args.length < 1) return false;
+                name = processed.args[0];
+                var uiIndex = name.indexOf('.ui');
+                if (uiIndex !== -1) {
+                    name = name.substring(0, uiIndex);
+                }
+                cuAPI.CloseUI(name);
                 return true;
             default:
                 return false;
